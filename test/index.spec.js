@@ -92,8 +92,8 @@ test('custom index.htm', async function () {
 
 test('codeUri as symbolic link', async function () {
     // Create a temporary directory with content
-    let tempDir = path.join(__dirname, "../test-temp-dir");
-    let symlinkPath = path.join(__dirname, "../test-symlink");
+    const tempDir = path.join(__dirname, "../test-temp-dir");
+    const symlinkPath = path.join(__dirname, "../test-symlink");
     
     // Clean up any existing test directories
     if (fs.existsSync(symlinkPath)) {

@@ -29,7 +29,8 @@ module.exports = async function index(inputs, args) {
       logger.debug(`Resolved symbolic link to actual path: ${newCodeUri}`);
     }
   } catch (error) {
-    logger.debug(`Error checking symbolic link: ${error.message}`);
+    // If lstatSync fails, newCodeUri is invalid and will be caught by copySync below
+    logger.warn(`Warning checking for symbolic link at ${newCodeUri}: ${error.message}`);
   }
   
   const publicPath = path.join(__dirname, "./code/public");

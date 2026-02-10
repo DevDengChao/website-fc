@@ -7,7 +7,7 @@ const HOST = "0.0.0.0";
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "$index"));
 });
 
 const server = app.listen(PORT, HOST);

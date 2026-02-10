@@ -90,7 +90,7 @@ test('custom index.htm', async function () {
     expect(generatedIndexContent.includes("index.htm")).toBeTruthy();
 });
 
-test('args.runtime should take priority', async function () {
+test('should prioritize user-provided runtime over default', async function () {
     let result = await subject({
         path: {
             configPath: exampleTmpl

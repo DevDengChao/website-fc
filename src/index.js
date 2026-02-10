@@ -1,5 +1,6 @@
 const core = require("@serverless-devs/core");
 const path = require("path");
+const fs = require("fs");
 const { lodash, fse, rimraf, Logger } = core;
 const logger = new Logger("website-fc");
 
@@ -16,9 +17,21 @@ module.exports = async function index(inputs, args) {
   const codeUri = lodash.get(inputs, "props.function.codeUri");
   if (lodash.isEmpty(codeUri)) return;
   const bashPath = path.dirname(lodash.get(inputs, "path.configPath"));
-  const newCodeUri = path.isAbsolute(codeUri)
+  let newCodeUri = path.isAbsolute(codeUri)
     ? codeUri
     : path.join(bashPath, codeUri);
+  
+  // Resolve symbolic link to actual directory
+  try {
+    const stats = fs.lstatSync(newCodeUri);
+    if (stats.isSymbolicLink()) {
+      newCodeUri = fs.realpathSync(newCodeUri);
+      logger.debug(`Resolved symbolic link to actual path: ${newCodeUri}`);
+    }
+  } catch (error) {
+    logger.debug(`Error checking symbolic link: ${error.message}`);
+  }
+  
   const publicPath = path.join(__dirname, "./code/public");
   rimraf.sync(publicPath);
   fse.ensureDirSync(publicPath);

@@ -90,4 +90,51 @@ test('custom index.htm', async function () {
     expect(generatedIndexContent.includes("index.htm")).toBeTruthy();
 });
 
+test('codeUri as symbolic link', async function () {
+    // Create a temporary directory with content
+    let tempDir = path.join(__dirname, "../test-temp-dir");
+    let symlinkPath = path.join(__dirname, "../test-symlink");
+    
+    // Clean up any existing test directories
+    if (fs.existsSync(symlinkPath)) {
+        fs.unlinkSync(symlinkPath);
+    }
+    if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true });
+    }
+    
+    // Create temporary directory with index.html
+    fs.mkdirSync(tempDir);
+    fs.writeFileSync(path.join(tempDir, "index.html"), "<html><body>Test</body></html>");
+    
+    // Create symbolic link pointing to the temporary directory
+    fs.symlinkSync(tempDir, symlinkPath, 'dir');
+    
+    try {
+        // Test with the symbolic link as codeUri
+        let result = await subject({
+            path: {
+                configPath: exampleTmpl
+            },
+            props: {
+                function: {
+                    codeUri: symlinkPath
+                }
+            }
+        }, {});
+        
+        // Verify that the content was copied correctly
+        expect(fs.existsSync(path.join(outputDir, "index.html"))).toBeTruthy();
+        expect(result.props.function.runtime).toBe("custom");
+    } finally {
+        // Clean up
+        if (fs.existsSync(symlinkPath)) {
+            fs.unlinkSync(symlinkPath);
+        }
+        if (fs.existsSync(tempDir)) {
+            fs.rmSync(tempDir, { recursive: true });
+        }
+    }
+});
+
 

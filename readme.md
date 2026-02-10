@@ -78,6 +78,7 @@ services:
 | 参数名称 | 默认值 | 参数含义 | 必填 |
 | --- | --- | --- |--- |
 | index  | index.html |  自定义默认首页    | false |
+| runtime  | custom |  自定义函数运行时    | false |
 
 
 我们知道访问静态网站需要一个`html`的页面作为首页，比如您访问`http://www.serverless-devs.com/`首页的时候，其实实际访问的资源是`http://www.serverless-devs.com/index.html`。
@@ -90,6 +91,19 @@ actions: # 自定义执行逻辑
       args:
         index: demo.html
 ```
+
+**自定义运行时**
+
+`website-fc`插件默认会将函数的运行时设置为`custom`。如果您需要使用其他运行时（如 `nodejs14`、`nodejs16` 等），可以通过 `runtime` 参数指定：
+```
+actions: # 自定义执行逻辑
+  pre-deploy: # 在deploy之前运行
+    - plugin: website-fc
+      args:
+        runtime: nodejs16
+```
+
+当您指定了 `runtime` 参数后，插件将优先使用您指定的运行时，而不是默认的 `custom` 运行时。
 
 可以参考[案例](https://github.com/devsapp/start-realwrold/tree/master/src)
 

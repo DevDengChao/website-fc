@@ -90,4 +90,23 @@ test('custom index.htm', async function () {
     expect(generatedIndexContent.includes("index.htm")).toBeTruthy();
 });
 
+test('args.runtime should take priority', async function () {
+    let result = await subject({
+        path: {
+            configPath: exampleTmpl
+        },
+        props: {
+            function: {
+                codeUri: exampleDist
+            }
+        }
+    }, {
+        runtime: "nodejs16"
+    });
+
+    expect(result.props.function.runtime).toBe("nodejs16");
+    expect(result.props.function.codeUri).toBe(path.join(__dirname, "../src/code"));
+    expect(result.props.function.caPort).toBe(9000);
+});
+
 

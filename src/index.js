@@ -35,10 +35,11 @@ module.exports = async function index(inputs, args) {
     path.join(__dirname, "./code/index.js"),
     lodash.replace(indexData, "$index", index)
   );
+  const runtime = lodash.get(args, "runtime", "custom");
   return lodash.merge(inputs, {
     props: {
       function: {
-        runtime: "custom",
+        runtime: runtime,
         codeUri: path.join(__dirname, "./code"), // 支持ZIP能力
         customRuntimeConfig: {
           command: ["node"],

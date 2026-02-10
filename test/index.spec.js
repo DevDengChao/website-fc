@@ -101,10 +101,10 @@ test('args.runtime should take priority', async function () {
             }
         }
     }, {
-        runtime: "nodejs16"
+        runtime: "custom.debian11"
     });
 
-    expect(result.props.function.runtime).toBe("nodejs16");
+    expect(result.props.function.runtime).toBe("custom.debian11");
     expect(result.props.function.codeUri).toBe(path.join(__dirname, "../src/code"));
     expect(result.props.function.caPort).toBe(9000);
 });

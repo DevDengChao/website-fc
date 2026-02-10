@@ -94,13 +94,13 @@ actions: # 自定义执行逻辑
 
 **自定义运行时**
 
-`website-fc`插件默认会将函数的运行时设置为`custom`。如果您需要使用其他运行时（如 `nodejs14`、`nodejs16` 等），可以通过 `runtime` 参数指定：
+`website-fc`插件默认会将函数的运行时设置为`custom`。如果您需要使用其他运行时（如 `custom.debian11`、`nodejs14`、`nodejs16` 等），可以通过 `runtime` 参数指定：
 ```
 actions: # 自定义执行逻辑
   pre-deploy: # 在deploy之前运行
     - plugin: website-fc
       args:
-        runtime: nodejs16
+        runtime: custom.debian11
 ```
 
 当您指定了 `runtime` 参数后，插件将优先使用您指定的运行时，而不是默认的 `custom` 运行时。

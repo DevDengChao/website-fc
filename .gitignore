@@ -2,7 +2,6 @@
 node_modules
 !src/code/node_modules
 src/code/public/
-src/code/index.js
 coverage/
 .s
 

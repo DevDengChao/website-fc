@@ -4,7 +4,5 @@ src/code/public/
 coverage/
 .s
 
-package-lock.json
-yarn.lock
 
 .copilot/

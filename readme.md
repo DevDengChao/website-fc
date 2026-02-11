@@ -77,6 +77,7 @@ services:
 | --- | --- | --- |--- |
 | index  | index.html |  自定义默认首页    | false |
 | runtime  | custom |  自定义函数运行时    | false |
+| version  | latest |  serve 依赖版本（npm 版本范围）    | false |
 
 
 我们知道访问静态网站需要一个`html`的页面作为首页，比如您访问`http://www.serverless-devs.com/`首页的时候，其实实际访问的资源是`http://www.serverless-devs.com/index.html`。
@@ -92,7 +93,7 @@ actions: # 自定义执行逻辑
 
 **自定义运行时**
 
-`website-fc`插件默认会将函数的运行时设置为`custom`。如果您需要使用其他运行时（如 `custom.debian11` 等），可以通过 `runtime` 参数指定：
+`website-fc-serve`插件默认会将函数的运行时设置为`custom`。如果您需要使用其他运行时（如 `custom.debian11` 等），可以通过 `runtime` 参数指定：
 ```
 actions: # 自定义执行逻辑
   pre-deploy: # 在deploy之前运行
@@ -102,6 +103,17 @@ actions: # 自定义执行逻辑
 ```
 
 当您指定了 `runtime` 参数后，插件将优先使用您指定的运行时，而不是默认的 `custom` 运行时。
+
+**serve 版本**
+
+默认使用 npm 上最新稳定版的 `serve`。如需指定版本，可传入 `version` 参数：
+```
+actions: # 自定义执行逻辑
+  pre-deploy: # 在deploy之前运行
+    - plugin: website-fc-serve
+      args:
+        version: 14.2.0
+```
 
 可以参考[案例](https://github.com/devsapp/start-realwrold/tree/master/src)
 
@@ -184,7 +196,8 @@ resources:
 
 
 website-fc-serve 插件在把你的代码部署到云端前将 `runtime` 覆盖为了 `custom` 运行时, 将 `caPort` 覆盖为了 `9000`,
-以及生成了[一段简单的监听 9000 端口的 Express 代码](https://github.com/devsapp/website-fc/blob/master/src/template.js)到最终的 codeUri 中, [并通过 `node` 启动了 Express HTTP 服务器](https://github.com/devsapp/website-fc/blob/master/src/index.js).
+并在 `code/package.json` 中写入 `serve` 依赖（默认 latest，可通过 `version` 指定）。最终通过 `customRuntimeConfig`
+使用 `node ./node_modules/serve/build/main.js -s public -l tcp://0.0.0.0:9000` 启动静态文件服务。
 
 # 关于我们
 - Serverless Devs 工具：

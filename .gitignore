@@ -1,9 +1,10 @@
 .idea/
-node_modules
-!src/code/node_modules
+node_modules/
 src/code/public/
 coverage/
 .s
 
 package-lock.json
 yarn.lock
+
+.copilot/

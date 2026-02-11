@@ -1,10 +1,10 @@
 {
-  "name": "start-component",
+  "name": "website-fc-serve",
   "version": "0.0.1",
   "description": "This is a component demo for Serverless Devs Tool ",
   "autoInstall": false,
-  "homepage": "https://www.serverless-devs.com",
-  "author": "Serverless-Devs",
+  "homepage": "https://www.github.com/DevDengChao/website-fc-serve",
+  "author": "DevDengChao",
   "contributors": [],
   "license": "MIT",
   "main": "./src/index.js",

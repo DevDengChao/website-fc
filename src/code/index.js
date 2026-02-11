@@ -1,15 +1,23 @@
-const express = require("express");
 const path = require("path");
-const app = express();
+const { spawn } = require("child_process");
+
 const PORT = 9000;
 const HOST = "0.0.0.0";
+const serveBin = path.join(
+  __dirname,
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "serve.cmd" : "serve"
+);
+const serveArgs = ["-s", "public", "-l", `tcp://${HOST}:${PORT}`];
 
-app.use(express.static(path.join(__dirname, "public")));
+const serverProcess = spawn(serveBin, serveArgs, { stdio: "inherit" });
 
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+serverProcess.on("error", (error) => {
+  console.error(error);
+  process.exitCode = 1;
 });
 
-const server = app.listen(PORT, HOST);
-server.timeout = 0;
-server.keepAliveTimeout = 0;
+serverProcess.on("close", (code) => {
+  process.exitCode = code ?? 1;
+});

@@ -2,11 +2,20 @@ let subject = require("../src/index");
 let fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
+const axios = require("axios");
+const { spawn } = require("child_process");
+const http = require("http");
+
+jest.setTimeout(120000);
 
 let exampleDir = path.join(__dirname, "../example");
 let exampleDist = path.join(__dirname, "../example/dist");
 let exampleTmpl = path.join(__dirname, "../example/s.yaml");
 let outputDir = path.join(__dirname, "../src/code/public");
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const expectedServeCommand = ["node"];
+const expectedServeArgs = ["./node_modules/serve/build/main.js", "-s", "public", "-l", "tcp://0.0.0.0:9000"];
+
 
 test('props.codeUri not present', async function () {
     try {
@@ -41,11 +50,8 @@ test('default index.html', async function () {
     expect(result.props.runtime).toBe("custom");
     expect(result.props.code).toBe(path.join(__dirname, "../src/code"));
     expect(result.props.caPort).toBe(9000);
-    expect(result.props.customRuntimeConfig.command).toStrictEqual(["node"]);
-    expect(result.props.customRuntimeConfig.args).toStrictEqual(["/code/index.js"]);
-
-    let generatedIndexContent = fs.readFileSync(path.join(__dirname, "../src/code/index.js")).toString();
-    expect(generatedIndexContent.includes("index.html")).toBeTruthy();
+    expect(result.props.customRuntimeConfig.command).toStrictEqual(expectedServeCommand);
+    expect(result.props.customRuntimeConfig.args).toStrictEqual(expectedServeArgs);
 });
 
 test('relative codeUri', async function () {
@@ -70,9 +76,6 @@ test('custom index.htm', async function () {
     }, {
         index: "index.htm"
     });
-
-    let generatedIndexContent = fs.readFileSync(path.join(__dirname, "../src/code/index.js")).toString();
-    expect(generatedIndexContent.includes("index.htm")).toBeTruthy();
 });
 
 test('props.code is a symlink', async function () {
@@ -122,6 +125,103 @@ test('should prioritize user-provided runtime over default', async function () {
     expect(result.props.runtime).toBe("custom.debian11");
     expect(result.props.code).toBe(path.join(__dirname, "../src/code"));
     expect(result.props.caPort).toBe(9000);
+    expect(result.props.customRuntimeConfig.command).toStrictEqual(expectedServeCommand);
+    expect(result.props.customRuntimeConfig.args).toStrictEqual(expectedServeArgs);
+});
+
+test("serve should return index.html content", async function () {
+
+    const runCommand = (command, args, options) =>
+        new Promise((resolve, reject) => {
+            const child = spawn(command, args, { ...options, shell: true });
+            child.on("error", reject);
+            child.on("close", (code) => {
+                if (code === 0) {
+                    resolve();
+                    return;
+                }
+                reject(new Error(`${command} exited with code ${code}`));
+            });
+        });
+
+    const getWithoutKeepAlive = async (url) => {
+        const agent = new http.Agent({ keepAlive: false });
+        try {
+            return await axios.get(url, { httpAgent: agent });
+        } finally {
+            agent.destroy();
+        }
+    };
+
+    const waitForServer = async (url, timeoutMs) => {
+        const startTime = Date.now();
+        while (Date.now() - startTime < timeoutMs) {
+            try {
+                return await getWithoutKeepAlive(url);
+            } catch (error) {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+        }
+        throw new Error("Server did not become ready in time.");
+    };
+
+    const stopProcess = async (child, timeoutMs) => {
+        if (!child || child.exitCode !== null) {
+            return;
+        }
+        const closePromise = new Promise((resolve) => child.once("close", resolve));
+        child.kill();
+        let closed = await Promise.race([
+            closePromise.then(() => true),
+            new Promise((resolve) => setTimeout(() => resolve(false), timeoutMs))
+        ]);
+        if (closed || !child.pid) {
+            return;
+        }
+        try {
+            process.kill(child.pid, "SIGKILL");
+        } catch (error) {
+            if (error.code !== "ESRCH") {
+                throw error;
+            }
+        }
+        closed = await Promise.race([
+            closePromise.then(() => true),
+            new Promise((resolve) => setTimeout(() => resolve(false), timeoutMs))
+        ]);
+        if (!closed && child.exitCode === null) {
+            throw new Error("Failed to stop serve process.");
+        }
+    };
+
+    const codeDir = path.join(__dirname, "../src/code");
+    const result = await subject({
+        cwd: exampleDir,
+        props: {
+            code: exampleDist
+        }
+    }, {});
+
+    await runCommand(npmCommand, ["install", "--no-audit", "--no-fund"], {
+        cwd: codeDir,
+        stdio: "inherit"
+    });
+
+    const serveCommand = result.props.customRuntimeConfig.command[0];
+    const serveArgs = result.props.customRuntimeConfig.args;
+    const serverProcess = spawn(serveCommand, serveArgs, {
+        cwd: codeDir,
+        stdio: "inherit"
+    });
+    serverProcess.unref();
+
+    try {
+        const response = await waitForServer("http://localhost:9000", 30000);
+        const indexHtml = fs.readFileSync(path.join(codeDir, "public", "index.html"), "utf-8");
+        expect(response.data).toContain(indexHtml.trim());
+    } finally {
+        await stopProcess(serverProcess, 5000);
+    }
 });
 
 

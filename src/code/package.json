@@ -1,14 +1,14 @@
 {
-  "name": "code",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "website-fc-serve-code",
+  "version": "0.0.1",
+  "description": "使用 serve 代替 express 部署静态资源到 FC",
+  "homepage": "https://www.github.com/DevDengChao/website-fc-serve",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "serve -s public -l tcp://0.0.0.0:9000"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "DevDengChao",
+  "private": true,
   "dependencies": {
     "serve": "latest"
   }

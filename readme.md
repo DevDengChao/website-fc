@@ -1,4 +1,4 @@
-# Website-fc-v3 Plugin
+# Website-fc-serve Plugin
 ![image](https://img.alicdn.com/imgextra/i1/O1CN01X9ucax1hNPxyaFLkb_!!6000000004265-2-tps-1810-686.png)
 <p align="center" class="flex justify-center">
   <a href="https://nodejs.org/en/" class="ml-1">
@@ -46,13 +46,13 @@
 
 ### 使用教程
 #### 快速上手
-`website-fc-v3`本质是针对[FC组件](https://serverless-devs.com/fc/readme)进行增强。
+`website-fc-serve`本质是针对[FC组件](https://serverless-devs.com/fc/readme)进行增强。
 还是遵循FC组件的[Yaml规范](https://serverless-devs.com/fc/yaml/readme)，区别在于
-1. 在执行部署之前声明对应的插件`website-fc-v3`
+1. 在执行部署之前声明对应的插件`website-fc-serve`
 ```
 actions: # 自定义执行逻辑
   pre-deploy: # 在deploy之前运行
-    - plugin: website-fc-v3
+    - plugin: website-fc-serve
 ```
 2. 更改函数的[codeUri](https://serverless-devs.com/fc/yaml/function)为静态资源的本地地址
 ```
@@ -61,7 +61,7 @@ services:
     component: fc
     actions: # 自定义执行逻辑
       pre-deploy: # 在deploy之前运行
-        - plugin: website-fc-v3
+        - plugin: website-fc-serve
     props: #  组件的属性值
       region: ${vars.region}
       name: http-trigger-nodejs14
@@ -81,11 +81,11 @@ services:
 
 我们知道访问静态网站需要一个`html`的页面作为首页，比如您访问`http://www.serverless-devs.com/`首页的时候，其实实际访问的资源是`http://www.serverless-devs.com/index.html`。
 
-`website-fc-v3`插件的默认行为也是会将您的默认首页指向`index.html`。如果您需要自定义您的首页为`demo.html`。只需要做如下声明
+`website-fc-serve`插件的默认行为也是会将您的默认首页指向`index.html`。如果您需要自定义您的首页为`demo.html`。只需要做如下声明
 ```
 actions: # 自定义执行逻辑
   pre-deploy: # 在deploy之前运行
-    - plugin: website-fc-v3
+    - plugin: website-fc-serve
       args:
         index: demo.html
 ```
@@ -106,11 +106,11 @@ actions: # 自定义执行逻辑
 可以参考[案例](https://github.com/devsapp/start-realwrold/tree/master/src)
 
 #### 作用域
-`Website-fc-v3`只能在`pre-deploy`阶段生效。
+`website-fc-serve`只能在`pre-deploy`阶段生效。
 ```
 actions: # 自定义执行逻辑
   pre-deploy: # 在deploy之前运行
-    - plugin: website-fc-v3
+    - plugin: website-fc-serve
 ```
 
 ### 操作案例
@@ -128,7 +128,7 @@ access: default        # 密钥别名
 
 vars: # 全局变量
   region: cn-hangzhou
-  functionName: website-fc-v3
+  functionName: website-fc-serve
 
 resources:
   website:
@@ -183,7 +183,7 @@ resources:
 [插件模型开发指南](https://www.serverless-devs.com/sdm/serverless_package_model/package_model#%E6%8F%92%E4%BB%B6%E6%A8%A1%E5%9E%8B%E8%A7%84%E8%8C%83)
 
 
-website-fc-v3 插件在把你的代码部署到云端前将 `runtime` 覆盖为了 `custom` 运行时, 将 `caPort` 覆盖为了 `9000`,
+website-fc-serve 插件在把你的代码部署到云端前将 `runtime` 覆盖为了 `custom` 运行时, 将 `caPort` 覆盖为了 `9000`,
 以及生成了[一段简单的监听 9000 端口的 Express 代码](https://github.com/devsapp/website-fc/blob/master/src/template.js)到最终的 codeUri 中, [并通过 `node` 启动了 Express HTTP 服务器](https://github.com/devsapp/website-fc/blob/master/src/index.js).
 
 # 关于我们

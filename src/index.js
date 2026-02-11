@@ -28,6 +28,8 @@ module.exports = async function index(inputs, args, logger) {
     logger.debug(`Resolved symbolic link to actual path: ${newCodeUri}`);
   }
   const publicPath = path.join(__dirname, "./code/public");
+  const PORT = 9000;
+  const HOST = "0.0.0.0";
 
   rimraf.sync(publicPath);
   fse.ensureDirSync(publicPath);
@@ -36,14 +38,17 @@ module.exports = async function index(inputs, args, logger) {
   if (!fse.existsSync(path.join(publicPath, index))) {
     throw new Error(`${index} file not found.`);
   }
-  const indexData = fse.readFileSync(
-    path.join(__dirname, "template.js"),
-    "utf-8"
-  );
-  fse.writeFileSync(
-    path.join(__dirname, "./code/index.js"),
-    lodash.replace(indexData, "$index", index)
-  );
+  if (index !== "index.html") {
+    fse.copySync(path.join(publicPath, index), path.join(publicPath, "index.html"));
+  }
+  const serveVersion = lodash.get(args, "version", "latest");
+  const packageJsonPath = path.join(__dirname, "./code/package.json");
+  const packageJson = fse.readJsonSync(packageJsonPath);
+  const dependencies = { ...(packageJson.dependencies || {}) };
+  delete dependencies.express;
+  dependencies.serve = serveVersion;
+  packageJson.dependencies = dependencies;
+  fse.writeJsonSync(packageJsonPath, packageJson, { spaces: 2 });
   const runtime = lodash.get(args, "runtime", "custom");
   return lodash.merge(inputs, {
     props: {
@@ -51,9 +56,9 @@ module.exports = async function index(inputs, args, logger) {
         code: path.join(__dirname, "./code"), // 支持ZIP能力
         customRuntimeConfig: {
           command: ["node"],
-          args: ["/code/index.js"],
+          args: ["./node_modules/serve/build/main.js", "-s", "public", "-l", `tcp://${HOST}:${PORT}`],
         },
-        caPort: 9000,
+        caPort: PORT,
     },
   });
 };

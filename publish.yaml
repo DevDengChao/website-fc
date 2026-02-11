@@ -1,12 +1,11 @@
 Edition: 3.0.0
 Type: Plugin
-Name: website-fc-v3
+Name: website-fc-serve
 Provider:
   - 阿里云
-Version: 0.0.6
-Description: 使用fc部署静态资源
-HomePage: https://github.com/devsapp/website-fc
-Organization: 阿里云函数计算（FC）
+Version: 0.0.1
+Description: 使用 serve 代替 express 部署静态资源到 FC
+HomePage: https://github.com/DevDengChao/website-fc-serve
 Effective: Public
 Tags: #标签详情
   - Serverless Devs

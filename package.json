@@ -1,7 +1,7 @@
 {
   "name": "website-fc-serve",
   "version": "0.0.1",
-  "description": "This is a component demo for Serverless Devs Tool ",
+  "description": "使用 serve 代替 express 部署静态资源到 FC",
   "autoInstall": false,
   "homepage": "https://www.github.com/DevDengChao/website-fc-serve",
   "author": "DevDengChao",
